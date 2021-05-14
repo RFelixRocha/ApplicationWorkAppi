@@ -2,7 +2,14 @@ package com.example.applicationworkappi
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.applicationworkappi.api.MyRetrofit
+import com.example.applicationworkappi.model.Product
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,5 +20,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         recycleProducts = findViewById(R.id.recycler_product)
+        recycleProducts.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun getData(){
+
+        val call: Call<List<Product>> =
+            MyRetrofit.instance?.productApi()?.getProductApi() as Call<List<Product>>
+
+        call.enqueue(object : Callback<List<Product>>{
+
+            override fun onResponse(
+                call: retrofit2.Call<List<Product>>,
+                response: Response<List<Product>>
+            ) {
+
+                val adapter = ProductAdapter(this@MainActivity,response.body()?.toList() as List<Product>)
+
+                recycleProducts.adapter = adapter
+            }
+
+            override fun onFailure(call: retrofit2.Call<List<Product>>, t: Throwable) {
+                Toast.makeText(this@MainActivity, t.message,Toast.LENGTH_LONG).show()
+            }
+
+        })
     }
 }
